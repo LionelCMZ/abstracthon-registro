@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { Check, GitBranch, Loader2, Send, TriangleAlert } from "lucide-react";
 import { isSupabaseConfigured } from "../lib/supabase.js";
 import { createTeam } from "../lib/teams.js";
@@ -67,25 +66,6 @@ export default function RegisterPage() {
           <h1 className="mt-6 font-display text-4xl font-bold tracking-tight text-white">
             Gracias por el llenado
           </h1>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              to="/equipos"
-              className="rounded-xl bg-action px-5 py-3 text-sm font-semibold text-ink transition hover:brightness-110"
-            >
-              Ver equipos registrados
-            </Link>
-            <button
-              type="button"
-              onClick={() => {
-                setForm(createEmptyForm());
-                setErrors({});
-                setStatus("idle");
-              }}
-              className="rounded-xl border border-line px-5 py-3 text-sm font-semibold text-copy transition hover:border-action hover:text-action"
-            >
-              Registrar otro equipo
-            </button>
-          </div>
         </div>
       </main>
     );
