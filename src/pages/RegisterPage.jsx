@@ -4,7 +4,28 @@ import { isSupabaseConfigured } from "../lib/supabase.js";
 import { createTeam } from "../lib/teams.js";
 
 const GITHUB_RE = /^https?:\/\/(www\.)?github\.com\/\S+$/i;
+const REGISTERED_KEY = "abstracthon:registered";
 const createEmptyForm = () => ({ teamName: "", githubUrl: "" });
+
+function readRegistered() {
+  try {
+    return window.localStorage.getItem(REGISTERED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function setRegistered(registered) {
+  try {
+    if (registered) {
+      window.localStorage.setItem(REGISTERED_KEY, "1");
+    } else {
+      window.localStorage.removeItem(REGISTERED_KEY);
+    }
+  } catch {
+    return;
+  }
+}
 
 const fieldClass =
   "mt-2 w-full rounded-xl border border-line bg-ink px-4 py-3 text-sm text-white placeholder:text-muted outline-none transition focus:border-action focus:ring-2 focus:ring-action/20";
@@ -27,7 +48,7 @@ function validate({ teamName, githubUrl }) {
 export default function RegisterPage() {
   const [form, setForm] = useState(createEmptyForm);
   const [errors, setErrors] = useState({});
-  const [status, setStatus] = useState("idle");
+  const [status, setStatus] = useState(() => (readRegistered() ? "done" : "idle"));
   const [errorText, setErrorText] = useState("");
 
   const updateField = (key, value) => {
@@ -38,6 +59,11 @@ export default function RegisterPage() {
   async function handleSubmit(event) {
     event.preventDefault();
 
+    if (readRegistered()) {
+      setStatus("done");
+      return;
+    }
+
     const payload = {
       teamName: form.teamName.trim(),
       githubUrl: form.githubUrl.trim(),
@@ -46,12 +72,14 @@ export default function RegisterPage() {
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0 || !isSupabaseConfigured) return;
 
+    setRegistered(true);
     setStatus("sending");
     setErrorText("");
     try {
       await createTeam(payload);
       setStatus("done");
     } catch (error) {
+      setRegistered(false);
       setErrorText(error?.message ?? "No se pudo guardar el equipo. Intenta de nuevo.");
       setStatus("error");
     }
